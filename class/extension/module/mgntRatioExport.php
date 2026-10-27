@@ -1,6 +1,7 @@
 <?php
 
 namespace rpf\extension\module;
+use rpf\extension\extensionModule;
 
 /**
  * class mgntRatioExport
@@ -54,6 +55,9 @@ class mgntRatioExport extends extensionModule
 
     /** @var array all total */
     protected $total = array();
+
+    /** @var array references into $costs/$sum/$product/$total, keyed by name */
+    protected $data = array();
 
     /**
      * Build the $data-array

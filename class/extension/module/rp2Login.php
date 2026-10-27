@@ -51,7 +51,7 @@ class rp2Login extends extensionModule
         header("Redirect:".RPF_API_MODULE_BBRPC_SETURL_URL.$token);
     }*/
 
-    public function execute($param)
+    public function execute($param = NULL)
     {
         parent::execute($param);
         throw new exception(

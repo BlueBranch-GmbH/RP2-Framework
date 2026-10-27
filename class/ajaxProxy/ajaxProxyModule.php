@@ -56,7 +56,7 @@ class ajaxProxyModule extends module
      * @link http://stackoverflow.com/users/717267/eduardo-cuomo
      * @see http://stackoverflow.com/a/15161640
      */
-    private function returnRequest($url, array $data, array $headers = null) {
+    private function returnRequest($url, array $data, ?array $headers = null) {
         $params = array(
             'http' => array(
                 'method' => 'POST',

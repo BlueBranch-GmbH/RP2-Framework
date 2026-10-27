@@ -129,7 +129,17 @@ function exceptionHandler(\Exception $e)
 }
 
 /**
- * Lets pass all php-errors to our syslog
+ * Lets pass all php-errors to our syslog.
+ *
+ * Only genuinely fatal error-types stop the script; everything else
+ * (warnings, notices, deprecations, ...) is logged and execution continues.
+ *
+ * This used to die() on literally every single error-type, which made the
+ * app unusable on PHP 8+: things that were silent E_NOTICEs on PHP 5/7 (an
+ * undefined array key, passing null to a non-nullable internal function
+ * parameter, implicitly creating a dynamic property, ...) are E_WARNING or
+ * E_DEPRECATED on PHP 8.x, and there are *many* more of them - every one of
+ * them used to kill the request outright.
  *
  * @param $errorNumber
  * @param $errorString
@@ -139,8 +149,16 @@ function exceptionHandler(\Exception $e)
  */
 function errorHandler($errorNumber, $errorString, $errorFile, $errorLine)
 {
+    $fatal = [E_USER_ERROR, E_RECOVERABLE_ERROR];
+
+    if (!in_array($errorNumber, $fatal, true))
+    {
+        log::warning("$errorString in $errorFile:$errorLine", __FUNCTION__);
+        return true; // Tell PHP we've handled it, no need for its own (silent) handling too
+    }
+
     showError("Sorry, the script died with a PHP-Error", $errorString.' in '.$errorFile.':'.$errorLine);
-    log::error("PHP-ERROR\n\n!!!!! $errorString\n!!!!! $errorFile:$errorLine\n", __METHOD__, debug_backtrace());
+    log::error("PHP-ERROR\n\n!!!!! $errorString\n!!!!! $errorFile:$errorLine\n", __FUNCTION__, debug_backtrace());
     die();
 }
 

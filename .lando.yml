@@ -3,21 +3,20 @@ name: rp2-framework
 # This app only talks to the remote RP2-API over HTTPS - it has no local
 # database of its own, so there's no "lamp" recipe/mysql service here.
 #
-# PHP 7.4 on purpose (not 8.x): bootstrap.php installs a global error-handler
-# that calls die() on EVERY php error, including deprecation notices. Several
-# legacy code-paths (e.g. utf8_encode()/utf8_decode() in class/api/bb.rpc.php)
-# are deprecated since PHP 8.2, which would kill most requests outright.
-# Expect PHP *notices* (undefined array keys/variables) to still interrupt
-# requests here and there even on 7.4 - that's existing app behaviour, not a
-# Lando issue; it's one of the things worth finding while testing.
+# PHP 8.4 is the primary target (current, actively tested - see
+# docs/05-php84-kompatibilitaet.md for what that took: the codebase itself
+# was ported, not just this container). PHP 7.4 is a verified fallback - lint
+# and the entry-points below ran clean on it too - in case the real hosting
+# target only offers an older version. To test the fallback locally, change
+# `type: php:8.4` below to `type: php:7.4` and `lando rebuild -y`.
 services:
   appserver:
-    type: php:7.4
+    type: php:8.4
     via: apache
     webroot: htdocs
     # curl, json and mbstring (required by class/api/bb.rpc.php /
-    # config.default.php) already ship with Lando's php:7.4 image - verified
-    # via `lando php -m`, no extra build step needed.
+    # config.default.php) already ship with Lando's php images - verified
+    # via `lando php -m` on both 7.4 and 8.4, no extra build step needed.
     overrides:
       volumes:
         # Writable syslog output (config.default.php -> RPF_SYSTEM_MODULE_LOG_DIR)

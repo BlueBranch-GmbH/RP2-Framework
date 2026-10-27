@@ -4,3 +4,6 @@ bb.rpc.cookie
 
 # Personal Lando overrides (ports, etc.) - never the shared .lando.yml itself
 .lando.local.yml
+
+# Local-only notes/findings - deliberately never pushed to GitHub
+/docs

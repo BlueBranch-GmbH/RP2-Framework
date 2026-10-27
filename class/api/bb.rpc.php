@@ -208,14 +208,14 @@ class bbRpc{
       'msg' => $sMsg,
     );
   }
-  final private static function setOpt($sOption,$xValue){
+  private static function setOpt($sOption,$xValue){
     if (!curl_setopt(static::$client,$sOption,$xValue)){
       static::addError('Fehler beim Setzen der Client-Option: '.$sOption.' auf: '.$xValue);
       return 0;
     }
     return 1;
   }
-  final private static function init(){
+  private static function init(){
     if (is_null(static::$cookie)){
       static::$cookie = (defined('BBRPC_COOKIE')) ? BBRPC_COOKIE : getcwd().'/bb.rpc.cookie';
     }
@@ -241,22 +241,22 @@ class bbRpc{
     }
     return 0;
   }
-  final private static function isCriticalError(){
+  private static function isCriticalError(){
     return (static::getResponse('IsCriticalError')) ? TRUE : FALSE;
   }
-  final private static function getResponse($sName){
+  private static function getResponse($sName){
     return (is_array(static::$response) && array_key_exists($sName,static::$response)) ? static::$response[$sName] : NULL;
   }
-  final private static function getErrors(){
+  private static function getErrors(){
     return static::getResponse(static::error_msg);
   }
-  final private static function replacePlaceholder($sMsg,$hPlaceholders){
+  private static function replacePlaceholder($sMsg,$hPlaceholders){
     foreach($hPlaceholders as $sFld => $sDscr){
       $sMsg = str_replace("\$".$sFld,$sDscr,$sMsg);
     }
     return $sMsg;
   }
-  final private static function displayMessages($hPlaceholders=null){
+  private static function displayMessages($hPlaceholders=null){
     $ahMsgs = static::getErrors();
     if (is_array($ahMsgs)){
       foreach($ahMsgs as $hMsg){
@@ -267,7 +267,7 @@ class bbRpc{
       }
     }
   }
-  final private static function utf8_encode_data($xData){
+  private static function utf8_encode_data($xData){
     if (is_array($xData)){
       $aKeys = array_keys($xData);
       while(($xKey = array_shift($aKeys)) !== null){
@@ -278,12 +278,13 @@ class bbRpc{
       }
       return $xData;
     }elseif (is_string($xData)){
-      return utf8_encode($xData);
+      // utf8_encode() is deprecated since PHP 8.2; mb_convert_encoding() is the documented replacement.
+      return mb_convert_encoding($xData, 'UTF-8', 'ISO-8859-1');
     }else{
       return $xData;
     }
   }
-  final private static function utf8_decode_data($xData){
+  private static function utf8_decode_data($xData){
     if (is_array($xData)){
       $aKeys = array_keys($xData);
       while(($xKey = array_shift($aKeys)) !== null){
@@ -294,7 +295,8 @@ class bbRpc{
       }
       return $xData;
     }elseif (is_string($xData)){
-      return utf8_decode($xData);
+      // utf8_decode() is deprecated since PHP 8.2; mb_convert_encoding() is the documented replacement.
+      return mb_convert_encoding($xData, 'ISO-8859-1', 'UTF-8');
     }elseif (is_float($xData) || is_double($xData)){
       if (strpos((string)$xData,'.') === false && strpos((string)$xData,',') === false){
         return (integer) $xData;
@@ -305,13 +307,13 @@ class bbRpc{
       return $xData;
     }
   }
-  final private static function json_encode($xData){
+  private static function json_encode($xData){
     return (static::$utf8) ? json_encode($xData) : json_encode(static::utf8_encode_data($xData));
   }
-  final private static function json_decode($xData){
+  private static function json_decode($xData){
     return (static::$utf8) ? json_decode($xData,1) : static::utf8_decode_data(json_decode($xData,1));
   }
-  final private static function post($sMethod,$xArgs=null,$sTyp='call',$hPlaceholders=null){
+  private static function post($sMethod,$xArgs=null,$sTyp='call',$hPlaceholders=null){
     static::init();
     $sSessionID = (array_key_exists('sid',static::$session) && static::$session['sid']) ? static::$session['sid'] : '__';
     if ($sTyp == 'call'){

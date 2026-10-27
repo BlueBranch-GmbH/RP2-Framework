@@ -12,6 +12,9 @@ class bbOrder_readDisposition extends apiModule
 {
     const rpcMethod = 'bbOrder::readDisposition';
 
+    /** @var array */
+    protected $disposition = array();
+
     /**
      * @param int $oeid
      * @return $this|bbOrder_readDisposition

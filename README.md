@@ -74,9 +74,12 @@ _Status: Not implemented yet_
 
 * Download the [latest release](https://github.com/ADoebeling/RP2-Framework/releases)  and unzip it on your server  
 (On Bash: `wget https://github.com/ADoebeling/RP2-Framework/archive/XXX.tgz && tar xzf XXX.tgz`)  
-* Setup a new subdomain (with ssl-wildcard-cert and php 5.6) and point the target to htdocs
+* Setup a new subdomain (with ssl-wildcard-cert and PHP 8.4 - the version this codebase is
+  actively tested against; PHP 7.4+ also works as a fallback) and point the target to htdocs
 * Open the subdomain in your browser. You're done.
 * By default no configuration is necessary 
+* Want to try it locally first? There's a `.lando.yml` in the project root (`lando start`);
+  it has no local database, it just talks to the remote RP2-API.
 
 ## RPF-API
 

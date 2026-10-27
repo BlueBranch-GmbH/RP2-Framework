@@ -103,7 +103,8 @@ class csvExport extends extensionModule
         header('Content-Type: text/html; charset=iso-8859-15');
         header('Content-Type: application/csv');
         header("Content-Disposition: attachment; filename=\"$filename\";");
-        echo utf8_decode($this->getCsv());
+        // utf8_decode() is deprecated since PHP 8.2; mb_convert_encoding() is the documented replacement.
+        echo mb_convert_encoding($this->getCsv(), 'ISO-8859-1', 'UTF-8');
         return $this;
     }
 

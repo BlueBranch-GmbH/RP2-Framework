@@ -12,7 +12,7 @@
 /*
  * External Access
  */
-require_once '../bootstrap.php';                // Include the framework
+require_once '../../bootstrap.php';             // Include the framework
 $rpf = new \rpf\system\rpf();                   // Instantiate the framework
 
 $rpf
