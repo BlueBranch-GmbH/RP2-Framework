@@ -17,7 +17,7 @@ $rpf = new \rpf\system\rpf();                   // Instantiate the framework
 
 $rpf
     ->getApi()                                  // Optional: Load the api
-    ->getUser()                                 // Optional: Load the user-module
+    ->getRpcAuth()                                 // Optional: Load the auth-module
     ->httpAuth();                               // Optional: Send http-auth if you need to authenticate first
 
 $result = $rpf                                  // Store result (of get() ) to the array $result

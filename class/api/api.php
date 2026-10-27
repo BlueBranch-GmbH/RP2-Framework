@@ -37,7 +37,6 @@ use rpf\api\module\customer;
 use rpf\api\module\email;
 use rpf\api\module\order;
 use rpf\api\module\placeholder;
-use rpf\api\module\user;
 use rpf\system\module;
 use rpf\system\module\log;
 

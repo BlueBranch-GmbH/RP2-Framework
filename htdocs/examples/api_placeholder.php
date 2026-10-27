@@ -19,7 +19,7 @@ $rpf = new \rpf\system\rpf();                   // Setup rpf
 
 $rpf
     ->getApi()                                  // Optional: Load the api
-    ->getUser()                                 // Optional: Load the user-module
+    ->getRpcAuth()                                 // Optional: Load the auth-module
     ->httpAuth();                               // Optional: Send http-auth if you need to authenticate first
 
 $result = $rpf
@@ -60,7 +60,7 @@ $myExtension = new myNewExtension();                    // Direct initialization
 
 $myExtension
     ->getApi()                                          // Optional: Load the api
-    ->getUser()                                         // Optional: Load the user-module
+    ->getRpcAuth()                                         // Optional: Load the auth-module
     ->httpAuth();                                       // Optional: Send http-auth if you need to authenticate first
 
 $result = $myExtension

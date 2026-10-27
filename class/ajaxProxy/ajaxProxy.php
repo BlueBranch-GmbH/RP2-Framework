@@ -2,7 +2,7 @@
 
 // Not in use
 
-namespace rpf\apiResponse;
+namespace rpf\ajaxProxy;
 use rpf\system\module;
 
 /**

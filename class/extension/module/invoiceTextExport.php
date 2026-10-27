@@ -18,8 +18,6 @@ use rpf\extension\extensionModule;
  * @link https://github.com/ADoebeling
  * @link http://xing.doebeling.de
  * @link https://www.1601.com
- *
- * @TODO Use bbOrder::readDisposition instead of readEntry to get so_type and clean prices #5401975
  */
 class invoiceTextExport extends extensionModule
 {
@@ -47,10 +45,9 @@ class invoiceTextExport extends extensionModule
      */
     public function getAllOrders()
     {
-        //$result = $this->getApi()->getOrder()->loadAll(['accounting' => 1])->getData();
-        $result = $this->getApi()->getOrder()->loadAll(['accounting' => 1])->getData();
-        //$result = $this->getApi()->getOrderReadEntry()->addAccountEntries();
+        $result = $this->getApi()->getOrderReadEntry()->addActiveDispositions()->addDispositionPrices()->getArray();
 
+        $return = [];
         foreach ($result as $row)
         {
             $priceMonth = 0;
@@ -79,7 +76,8 @@ class invoiceTextExport extends extensionModule
      */
     public function getAddress($ordNr)
     {
-        $address = $this->getApi()->getOrder()->load($ordNr)->getData()[$ordNr]['customer']['adress']['inv'];
+        $order = $this->getApi()->getOrderReadEntry()->setOrdnr($ordNr)->addCustomerAddress()->getArray();
+        $address = $order[$ordNr]['customer']['adress']['inv'];
         $return['invoiceAddressBlock'] = !empty($address['company']) ?  $address['company']."\n" : '';
         $return['invoiceAddressBlock'] .= "{$address['first_name']} {$address['last_name']}\n";
         $return['invoiceAddressBlock'] .= !empty($address['adress_1']) ?  $address['adress_1']."\n" : '';
@@ -99,7 +97,7 @@ class invoiceTextExport extends extensionModule
      */
     public function getTariff($ordNr)
     {
-        $dispos = $this->getApi()->getOrder()->load($ordNr)->getData()[$ordNr]['dispositions'];
+        $dispos = $this->loadDispositions($ordNr);
         foreach ($dispos as $row)
         {
             if ($row['product']['norm'] == 'tariff')
@@ -122,7 +120,7 @@ class invoiceTextExport extends extensionModule
      */
     public function getDomains($ordNr)
     {
-        $dispos = $this->getApi()->getOrder()->load($ordNr)->getData()[$ordNr]['dispositions'];
+        $dispos = $this->loadDispositions($ordNr);
         $sumPrice = 0;
         $sumPriceDefault = 0;
         $return['item'] = array();
@@ -180,7 +178,7 @@ class invoiceTextExport extends extensionModule
      */
     public function getAddOns($ordNr)
     {
-        $dispos = $this->getApi()->getOrder()->load($ordNr)->getData()[$ordNr]['dispositions'];
+        $dispos = $this->loadDispositions($ordNr);
         $sumPrice = 0;
         $sumPriceDefault = 0;
         $return['item'] = array();
@@ -217,15 +215,11 @@ class invoiceTextExport extends extensionModule
      */
     public function getCertificates($ordNr)
     {
-        $disposition = $this->getApi()->getOrder()->loadDisposition($ordNr)->getDisposition($ordNr);
-        $disposition = $this->getApi()->getOrder()->loadDisposition($ordNr)->getDisposition($ordNr);
+        $dispos = $this->loadDispositions($ordNr);
 
-
-        $sumPrice = 0;
-        $sumPriceDefault = 0;
         $return = array();
 
-        foreach ($disposition as $row)
+        foreach ($dispos as $row)
         {
             // Workaround against RP2-API-BUG #5402091:
             // There is no [product][norm] for ssl-certificates
@@ -275,10 +269,8 @@ class invoiceTextExport extends extensionModule
      */
     public function getExchangeAccounts($ordNr)
     {
-        $dispos = $this->getApi()->getOrder()->load($ordNr)->getData()[$ordNr]['dispositions'];
+        $dispos = $this->loadDispositions($ordNr);
 
-        $sumPrice = 0;
-        $sumPriceDefault = 0;
         $return = array();
 
         foreach ($dispos as $row)
@@ -313,14 +305,35 @@ class invoiceTextExport extends extensionModule
         return (array) $return;
     }
 
+    /**
+     * Loads all active dispositions (incl. prices) for a single order.
+     *
+     * Replaces the former, broken `getApi()->getOrder()->load(...)` call-chain
+     * (the "order" api-module is DEPRECATED and relied on a non-existent
+     * `$this->system` property) with the modern bbOrder::readEntry module.
+     *
+     * @param string $ordNr
+     * @return array
+     * @throws \Exception
+     */
+    protected function loadDispositions($ordNr)
+    {
+        $order = $this->getApi()->getOrderReadEntry()->setOrdnr($ordNr)->addActiveDispositions()->addDispositionPrices()->getArray();
+        if (!isset($order[$ordNr]['dispositions']))
+        {
+            throw new \Exception("OrderNr $ordNr doesn't exist or has no dispositions", 404);
+        }
+        return $order[$ordNr]['dispositions'];
+    }
+
 
     /**
-     * Formats float into 12.345,67 � and integer into 12.345,- �
+     * Formats float into 12.345,67 € and integer into 12.345,- €
      * Returns $zeroString if price is NULL
      *
      * @param float|int $price
      * @param string $zeroString = Inklusive
-     * @return string (12.345,67 �|12.345,- �|Inklusive)
+     * @return string (12.345,67 €|12.345,- €|Inklusive)
      */
     static function getEuroFormatted($price, $zeroString = 'Inklusive')
     {
@@ -336,7 +349,7 @@ class invoiceTextExport extends extensionModule
      * @param string $patternZero
      * @param string $patternDiscount
      * @param bool $activeAccounting
-     * @return string (12.345,67 �|12.345,- �|12.345,67 � // Abzgl. 1.345,- � Rabatt)
+     * @return string (12.345,67 €|12.345,- €|12.345,67 € // Abzgl. 1.345,- € Rabatt)
      */
     static function getPriceFormatted($price, $priceDefault = NULL, $activeAccounting = 1)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace rpf\ajaxProxyModule;
+namespace rpf\ajaxProxy;
 use rpf\system\module;
 
 /**
@@ -34,14 +34,14 @@ class ajaxProxyModule extends module
 
     public function __construct()
     {
-        parent::_construct();
+        parent::__construct();
 
     }
 
     protected function proxy($url = NULL, $post = NULL)
     {
-        $url =  $url != NULL ?: $_SERVER['SCRIPT_URL'];
-        $post = $post != NULL ?: $_POST;
+        $url = $url !== NULL ? $url : $_SERVER['SCRIPT_URL'];
+        $post = $post !== NULL ? $post : $_POST;
 
 
     }

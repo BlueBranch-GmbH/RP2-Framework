@@ -9,37 +9,65 @@ CSV-Export of all (sub-)domains with Order-Name, PHP-Version and target.
 Can be used to check for deprecated domain-settings in the seventh server-generation  
 _Status: Implemented and published_
 
-* **contaoLogChecker** (WIP)  
+* **FtpExport**  
+CSV-Export of all FTP-accounts.  
+_Status: Implemented, but not published yet_
+
+* **QuotaExport**  
+CSV-Export of all quota/storage-entries.  
+_Status: Implemented, but not published yet_
+
+* **mysqlExport**  
+CSV-Export of all mysql-databases.  
+_Status: Implemented and published_
+
+* **mailSaveEntryExport**  
+CSV-Export for the MailSaveEntry-import (see `script/getMailSerialized.php`).  
+_Status: Implemented, but not published yet_
+
+* **contractExport**  
+Exports domains (incl. AuthCode) and e-mail-accounts of one or more orders as copy&paste contract-handover template.  
+_Status: Implemented, but not published yet_
+
+* **invoiceTextExport**  
+Exports the invoice-texts (address, tariff, domains, add-ons, certificates, exchange-accounts) for each order as copy&paste template.  
+_Status: Implemented, but not published yet_
+
+* **mgntRatioExport**  
+Calculation-sheet with costs and contribution margin (CM1-CM5) for every article.  
+_Status: Implemented, but not published yet_
+
+* **mailExport**  
+Lists orders/customers by e-mail-usage. Library-only so far, no `htdocs`-frontend yet.  
+_Status: Implemented, but not published yet_
+
+* **ajaxProxy** (WIP)  
+Initial scaffold for ajax-callable endpoints (e.g. `emailSaveEntry`); loads correctly but doesn't perform real work yet.  
+_Status: Initial structure only_
+
+* **rp2Login** (experimental)  
+Attempt to log a user directly into the RP²-panel after an API-authentication.  
+_Status: **Not functional** - DomainFactory's RP2-API doesn't support handing an RPC-session over to the panel as a login-token. Calling it throws a clear exception instead of redirecting into a dead end. See the class-doc for details._
+
+* **contaoLogChecker** (planned)  
 Exports all contao-logs from all hosted databases  
-_Status: Implemented but not published yet_
+_Status: Not implemented yet_
 
-* **emailExport** (WIP)  
+* **emailExport** (planned)  
 Exports the complete e-mail-configuration as copy&paste template for customer service  
-_Status: Implemented but not published yet_
+_Status: Not implemented yet - see `mailExport`/`contractExport` for related, already implemented functionality_
 
-* **inconsistencyChecker** (WIP)  
+* **inconsistencyChecker** (planned)  
 Checks and alerts for some rp2-inconsistency like active unregistered domains  
-_Status: Implemented but not published yet_
+_Status: Not implemented yet_
 
-* **invoiceTextExport** (WIP)  
-Exports the invoice-texts for each order as copy&paste template  
-_Status: Implemented but not published yet_
-
-* **mysqlBackup** (WIP)  
+* **mysqlBackup** (planned)  
 Backup & Restore-Manager for mysql-databases  
 _Status: Not implemented yet_
 
-* **mysqlExport** (WIP)  
-CSV-Export of all mysql-databases.  
-_Status: Implemented and published_
- 
-* **mgntRatioExport** (WIP)  
-Calculation-sheet with costs and contribution margin for every article  
-_Status: Implemented but not published yet_
-
-* **siteMonitoring** (WIP)   
+* **siteMonitoring** (planned)   
 Monitor all (Sub-)Domains based on a screenshot-diff  
-_Status: Implemented but not published yet_
+_Status: Not implemented yet_
 
 
 ### Installation of RPF-Extensions
@@ -74,7 +102,7 @@ Me too! The api-user and api-password can requested by http-auth:
 ```php
 $rpf
     ->getApi()                                  // Load the api
-    ->getUser()                                 // Load the user-module
+    ->getRpcAuth()                              // Load the auth-module
     ->httpAuth();                               // Send http-auth if you need to authenticate first
 ```
 
@@ -105,7 +133,7 @@ The namespaces represent the file-structure
 * `\class\api\api.php`: The api-module
 * `\class\api\module\bbDomain_readEntry.php`: The Implementation of bbDomain::readEntry() as module of the api-module
 * `\class\extension\extension.php`: The extension-module
-* `\class\extension\module\domainExport.php`: The extension domainExport as module of the extension-module
+* `\class\extension\module\csvExportDomain.php`: The extension DomainExport as module of the extension-module
 
 
 # Contact

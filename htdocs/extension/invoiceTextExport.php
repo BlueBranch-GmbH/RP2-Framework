@@ -16,7 +16,7 @@ $rpf = new \rpf\system\rpf();
 
 $rpf
     ->getApi()
-    ->getUser()
+    ->getRpcAuth()
     ->httpAuth();
 
 

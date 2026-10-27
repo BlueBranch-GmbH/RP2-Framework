@@ -1,7 +1,7 @@
 <?php
 
-namespace rpf\apiResponse\module;
-use rpf\ajaxProxyModule\ajaxProxyModule;
+namespace rpf\ajaxProxy\module;
+use rpf\ajaxProxy\ajaxProxyModule;
 
 /**
  * @author Andreas Doebeling <ad@1601.com>

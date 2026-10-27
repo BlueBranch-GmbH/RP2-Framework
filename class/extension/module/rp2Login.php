@@ -2,16 +2,21 @@
 
 namespace rpf\extension\module;
 use rpf\extension\extensionModule;
+use rpf\system\module\exception;
 
 
 /**
  * RP2-Direct-Login
  *
+ * EXPERIMENTAL / CURRENTLY NON-FUNCTIONAL:
  * Caution: Doesn't work cause of creepy api-implementation of df:
  * You have to authenticate as admin to authenticate as user. WTF?!
  *
  * The RPC-SID can't be used as RP2-Login-Token :(
  *
+ * execute() fails loudly instead of silently redirecting into a dead end,
+ * until DomainFactory's RP2-API supports handing over an authenticated
+ * session to the panel. See the commented-out attempts below for context.
  *
  * @package rpf\extension\module
  */
@@ -49,8 +54,10 @@ class rp2Login extends extensionModule
     public function execute($param)
     {
         parent::execute($param);
-        require_once __DIR__.'/../../api/bb.rpc.php';
-        $token = $this->getApi()->getRpcSid()->getSid();
-        header("Location:".$this->getApi()->getRpcSetUrl()->getUrl().$token.'/');
+        throw new exception(
+            'rp2Login is not functional: the RP2-API does not allow using the RPC-Session-ID '.
+            'as a panel-login-token (see class-doc). Don\'t rely on this extension until '.
+            'DomainFactory provides a supported way to hand over an authenticated session.'
+        );
     }
 }
