@@ -1,3 +1,6 @@
 bb.rpc.cookie
 *.log
 .htaccess
+
+# Personal Lando overrides (ports, etc.) - never the shared .lando.yml itself
+.lando.local.yml

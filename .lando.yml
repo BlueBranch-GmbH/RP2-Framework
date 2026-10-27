@@ -1,0 +1,32 @@
+name: rp2-framework
+
+# This app only talks to the remote RP2-API over HTTPS - it has no local
+# database of its own, so there's no "lamp" recipe/mysql service here.
+#
+# PHP 7.4 on purpose (not 8.x): bootstrap.php installs a global error-handler
+# that calls die() on EVERY php error, including deprecation notices. Several
+# legacy code-paths (e.g. utf8_encode()/utf8_decode() in class/api/bb.rpc.php)
+# are deprecated since PHP 8.2, which would kill most requests outright.
+# Expect PHP *notices* (undefined array keys/variables) to still interrupt
+# requests here and there even on 7.4 - that's existing app behaviour, not a
+# Lando issue; it's one of the things worth finding while testing.
+services:
+  appserver:
+    type: php:7.4
+    via: apache
+    webroot: htdocs
+    # curl, json and mbstring (required by class/api/bb.rpc.php /
+    # config.default.php) already ship with Lando's php:7.4 image - verified
+    # via `lando php -m`, no extra build step needed.
+    overrides:
+      volumes:
+        # Writable syslog output (config.default.php -> RPF_SYSTEM_MODULE_LOG_DIR)
+        - ./logs:/app/logs
+
+tooling:
+  php:
+    service: appserver
+
+proxy:
+  appserver:
+    - rp2-framework.lndo.site
