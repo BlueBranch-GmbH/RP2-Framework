@@ -58,11 +58,11 @@ class mgntRatioExport extends extensionModule
     /**
      * Build the $data-array
      *
-     * @param extension $system
+     * @param mixed $executeParam
      */
-    public function __construct(extension &$system)
+    public function __construct($executeParam = false)
     {
-        parent::__construct($system);
+        parent::__construct($executeParam);
         $this->data['costs'] =& $this->costs;
         $this->data['sum'] =& $this->sum;
         $this->data['product'] =& $this->product;
@@ -90,7 +90,7 @@ class mgntRatioExport extends extensionModule
      */
     protected function calcOverall()
     {
-        foreach ($this->system->orders->loadAll(['accounting' => 1])->getData() as $order)
+        foreach ($this->getApi()->getOrderReadEntry()->addActiveDispositions()->addDispositionPrices()->getArray() as $order)
         {
             foreach ($order['dispositions'] as $dispo)
             {

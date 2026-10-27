@@ -17,7 +17,7 @@ $rpf = new \rpf\system\rpf();                   // Instantiate the framework
 
 $rpf
     ->getApi()                                  // Optional: Load the api
-    ->getUser()                                 // Optional: Load the user-module
+    ->getRpcAuth()                                 // Optional: Load the auth-module
     ->httpAuth();                               // Optional: Send http-auth if you need to authenticate first
 
 $result = $rpf                                  // Store result (of get() ) to the array $result
@@ -40,6 +40,6 @@ $result = $rpf                                  // Store result (of get() ) to t
 ->addWebalizerSettings()                    // Optional: Add webalizier-settings
 ->addStaid()                                // Optional: Add ???
 
-->get();                                    // Return result as array, primary-key set to domain
+->getArray();                                    // Return result as array, primary-key set to domain
 
 print_r($result);                               // Print-out the api-response

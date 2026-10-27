@@ -1,94 +1,121 @@
-<?php namespace rpf\extension;
+<?php
 
-require_once __DIR__ . '/../../extensionModule.php';
-//require_once '../../../../function/array_merge_recursive_distinct.php';
-class mailExport extends extensionModule {
+namespace rpf\extension\module;
+use rpf\extension\extensionModule;
+use rpf\system\module\exception;
 
-
+/**
+ * Class mailExport
+ *
+ * @author Andreas Doebeling <ad@1601.com>
+ * @copyright 1601.production siegler&thuemmler ohg
+ * @link https://github.com/ADoebeling/RP2-Framework
+ * @link https://xing-ad.1601.com
+ * @link https://www.1601.com
+ */
+class mailExport extends extensionModule
+{
     /**
      * Return all active orders with existing e-mail-adresses
      *
-     * @dependencies
-     * @return array
+     * @return array [ $ordnr[ oeid, cus_company, cus_first_name, cus_last_name, mail_addresses ] ]
      */
     public function getOrderList()
     {
-        // Load dependencies
-        $this->system->orders->loadAll();
-        $this->system->emails->loadOrderMailCount();
+        $orders = $this->getApi()->getOrderReadEntry()->addActiveDispositions()->getArray();
+        $mailCountsByOeid = $this->getMailCountsByOeid();
 
-        $data = array_merge_recursive_distinct(
-            $this->system->order->loadAll()->getOrder(),
-            $this->system->email->loadOrderMailCount()->getOrder()
-        );
-
-        foreach ($data as $row)
+        $return = [];
+        foreach ($orders as $row)
         {
-            if ($row['has_active_tariff'] == 1 && isset($row['mail_addresses']) && $row['mail_addresses'] > 0)
-            $return[$row['ordnr']] =
-                [
-                    'oeid' => $row['oeid'],
-                    'cus_company' => $row['cus_company'],
-                    'cus_first_name' => $row['cus_first_name'],
-                    'cus_last_name' => $row['cus_last_name'],
-                    'mail_addresses' => $row['mail_addresses']
-                ];
+            $oeid = $row['oeid'];
+            if (!empty($row['has_active_tariff']) && !empty($mailCountsByOeid[$oeid]))
+            {
+                $return[$row['ordnr']] =
+                    [
+                        'oeid' => $oeid,
+                        'cus_company' => isset($row['cus_company']) ? $row['cus_company'] : '',
+                        'cus_first_name' => isset($row['cus_first_name']) ? $row['cus_first_name'] : '',
+                        'cus_last_name' => isset($row['cus_last_name']) ? $row['cus_last_name'] : '',
+                        'mail_addresses' => $mailCountsByOeid[$oeid],
+                    ];
+            }
         }
         return $return;
     }
 
     /**
-     * Returns all e-mail-addresses for the given order-ids
+     * Returns all e-mail-addresses for the given order-ids (oeids)
      *
-     * @param array $orderIds
+     * @param array $oeids
+     * @return array [ $oeid => [ $email, ... ] ]
      * @throws \Exception
      */
-    public function getEmails(array $orderIds)
+    public function getEmails(array $oeids)
     {
-        if (!is_array($orderIds) || empty($orderIds))
+        if (empty($oeids))
         {
             throw new \Exception("Array of order-ids expected", 400);
         }
 
-        $data = $this->system->emails->loadAll()->getByOeid();
-        foreach($orderIds as $orderId)
+        $return = [];
+        foreach ($oeids as $oeid)
         {
-            if (!isset($data[$orderId]))
+            $accounts = $this->getApi()->getEmailReadAccount()->setOeid($oeid)->getArray(true, 'email');
+            if (empty($accounts))
             {
-                throw new \Exception("Invalid orderId: $orderId");
+                throw new \Exception("Invalid orderId: $oeid");
             }
-
-            print_r($row);
-
-            //$return[] = $row[...]
+            $return[$oeid] = array_keys($accounts);
         }
+        return $return;
     }
-
-    public function getEmailsConfigDesc(array $emails)
-    {
-        foreach ($emails as $row)
-        {
-            // TODO: Implement
-
-        }
-    }
-
-
-
 
     /**
      * Returns a description of the current e-mail-config for a/some given orders (oeids)
      *
-     * @param (int|array) $oeids
-     * @return $this
+     * @param int|array $oeids
+     * @return array [ $oeid => [ $email => [...] ] ]
      */
     public function getConfigDesc($oeids)
     {
         $oeids = is_int($oeids) ? [$oeids] : $oeids;
 
-        print_r($this->system->email->load($oeids)->getData());
-        echo "jo";
-        return $this;
+        $return = [];
+        foreach ($oeids as $oeid)
+        {
+            $return[$oeid] = $this->getApi()->getEmailReadAccount()->setOeid($oeid)->addUsed()->getArray(true, 'email');
+        }
+        return $return;
     }
 
+    /**
+     * @param array $emails
+     * @throws exception
+     * @todo Implement: no description of the expected output exists yet.
+     */
+    public function getEmailsConfigDesc(array $emails)
+    {
+        throw new exception(__METHOD__.' is not implemented yet', 501);
+    }
+
+    /**
+     * Counts all existing e-mail-addresses per order (oeid)
+     *
+     * @return array [ $oeid => $count ]
+     */
+    protected function getMailCountsByOeid()
+    {
+        $accounts = $this->getApi()->getEmailReadAccount()->getArray();
+
+        $counts = [];
+        foreach ($accounts as $account)
+        {
+            if (isset($account['oeid']))
+            {
+                $counts[$account['oeid']] = isset($counts[$account['oeid']]) ? $counts[$account['oeid']] + 1 : 1;
+            }
+        }
+        return $counts;
+    }
 }
